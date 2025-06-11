@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
 
@@ -11,6 +12,14 @@ exports.registerUser = async (req, res) => {
       return res.status(409).json({ 
         success: false,
         message: "Email already exists.",
+      });
+    }
+
+    const existingPhone = await User.findOne({ phone });
+    if (existingPhone) {
+      return res.status(409).json({ 
+        success: false,
+        message: "This phone number is already used.",
       });
     }
 
