@@ -198,7 +198,6 @@ exports.changePassword = async (req, res) => {
  * @route   DELETE /api/v1/auth/delete-account
  * @access  Private
  */
-expor
 exports.deleteAccount = async (req, res) => {
   const userId = req.user._id;
 
