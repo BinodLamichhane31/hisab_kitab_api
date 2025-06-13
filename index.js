@@ -2,15 +2,19 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require("./routes/userRoutes")
+const helmet = require('helmet')
+
+
 
 dotenv.config();
 
 const app = express();
+app.use(helmet())
 const PORT = process.env.PORT || 6060;
 
 connectDB();
 
-const cors = require('cors')
+const cors = require('cors');
 let corsOptions = {
     origin : '*',
  }
