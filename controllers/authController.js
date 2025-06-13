@@ -3,7 +3,11 @@ const bcrypt = require("bcrypt");
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
-
+/**
+ * @desc    Register a new user
+ * @route   PUT /api/v1/auth/register
+ * @access  Public
+ */
 exports.registerUser = async (req, res) => {
   const { fname, lname, email, phone, password } = req.body;
   try {
@@ -45,7 +49,11 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-
+/**
+ * @desc    Authenticate user and generate token (login)
+ * @route   POST /api/v1/auth/login
+ * @access  Public
+ */
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -91,6 +99,11 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get current user profile
+ * @route   GET /api/v1/auth/profile
+ * @access  Private
+ */
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user._id; // from authenticateToken middleware
@@ -115,6 +128,11 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Update user profile details
+ * @route   PUT /api/v1/auth/profile
+ * @access  Private
+ */
 exports.updateProfile = async (req, res) => {
   const userId = req.user._id;
   const { fname, lname, phone } = req.body;
@@ -139,6 +157,11 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Change user password
+ * @route   PUT /api/v1/auth/change-password
+ * @access  Private
+ */
 exports.changePassword = async (req, res) => {
   const userId = req.user._id;
   const { oldPassword, newPassword } = req.body;
@@ -170,6 +193,12 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Delete user account
+ * @route   DELETE /api/v1/auth/delete-account
+ * @access  Private
+ */
+expor
 exports.deleteAccount = async (req, res) => {
   const userId = req.user._id;
 
