@@ -27,4 +27,26 @@ router.get(
     getProfile
 )
 
+router.put(
+  "/profile",
+  authenticateToken,
+  updateProfileValidation,
+  validate,
+  updateProfile
+);
+
+router.put(
+  "/change-password",
+  authenticateToken,
+  passwordChangeValidation,
+  validate,
+  changePassword
+);
+
+router.delete(
+  "/delete-account",
+  authenticateToken,
+  deleteAccount
+);
+
 module.exports = router
