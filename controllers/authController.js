@@ -1,7 +1,28 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
+
+const sendTokenToResponse = (user, statusCode, res) =>{
+  const token = jwt.sign({id: user._id, role: user.role},process.env.JWT_SECRET,{
+    expiresIn:process.env.JWT_EXPIRE
+  })
+  const options = {
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+        httpOnly: true, 
+    };
+
+  if(process.env.NODE_ENV=="production"){
+    options.secure = true
+  }
+
+  res.status(statusCode)
+    .cookie('token',token,options)
+    .json({
+      success:true,
+      message:"Login successful."
+    })
+
+}
 
 /**
  * @desc    Register a new user
@@ -37,12 +58,12 @@ exports.registerUser = async (req, res) => {
     });
     await newUser.save();
 
-    return res.status(201).json({ // 201 Created
+    return res.status(201).json({ 
       success: true,
       message: "User Registered Successfully",
     });
   } catch (error) {
-    return res.status(500).json({ // 500 Internal Server Error
+    return res.status(500).json({ 
       success: false,
       message: `Server error: ${error.message}`,
     });
@@ -65,6 +86,13 @@ exports.loginUser = async (req, res) => {
       });
     }
 
+    if(!getUser.isActive){
+      return res.status(403).json({
+        success:false,
+        message: "Your account has been disabled. Please contact support."
+      })
+    }
+
     const checkPassword = await bcrypt.compare(password, getUser.password);
     if (!checkPassword) {
       return res.status(401).json({ 
@@ -73,28 +101,16 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    const payload = {
-      _id: getUser._id,
-      fname: getUser.fname,
-      lname: getUser.lname,
-      email: getUser.email,
-      phone: getUser.phone,
-    };
+    getUser.lastLogin = Date.now();
+    await getUser.save({validateBeforeSave:false})
 
-    const token = jwt.sign(payload, process.env.SECRET, { expiresIn: "7d" });
+    sendTokenToResponse(getUser,200,res)
 
-    const userData = await User.findById(getUser._id).select("-password");
-
-    return res.status(200).json({ 
-      success: true,
-      message: "Login successful.",
-      token,
-      data: userData,
-    });
+    
   } catch (error) {
     return res.status(500).json({ 
       success: false,
-      message: "Server Error",
+      message: "Server Error "+error,
     });
   }
 };
@@ -105,27 +121,10 @@ exports.loginUser = async (req, res) => {
  * @access  Private
  */
 exports.getProfile = async (req, res) => {
-  try {
-    const userId = req.user._id; // from authenticateToken middleware
-
-    const user = await User.findById(userId).select("-password");
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Server error.",
-    });
-  }
+  res.status(200).json({
+    success: true,
+    data: req.user,
+  });
 };
 
 /**
@@ -213,6 +212,14 @@ exports.deleteAccount = async (req, res) => {
       message: `Server error: ${error.message}`,
     });
   }
+};
+
+exports.logout = async (req, res) => {
+    res.cookie('token', 'none', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true,
+    });
+    res.status(200).json({ success: true, message: "Logged out." });
 };
 
 

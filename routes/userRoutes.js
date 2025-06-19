@@ -1,9 +1,9 @@
 const express = require('express')
-const { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount } = require('../controllers/authController')
+const { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount, logout } = require('../controllers/authController')
 const { registerValidation, loginValidation } = require('../validator/authValidator')
 const validate = require('../middlewares/validate')
 const loginLimiter = require('../middlewares/loginLimiter')
-const { authenticateToken } = require('../middlewares/authMiddleware')
+const { protect } = require('../middlewares/authMiddleware')
 const router = express.Router()
 
 router.post(
@@ -23,28 +23,34 @@ router.post(
 
 router.get(
     "/profile",
-    authenticateToken,
+    protect,
     getProfile
 )
 
 router.put(
   "/profile",
-  authenticateToken,
+  protect,
   validate,
   updateProfile
 );
 
 router.put(
   "/change-password",
-  authenticateToken,
+  protect,
   validate,
   changePassword
 );
 
 router.delete(
   "/delete-account",
-  authenticateToken,
+  protect,
   deleteAccount
 );
+
+router.post(
+  "/logout",
+  protect,
+  logout
+)
 
 module.exports = router
