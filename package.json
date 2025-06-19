@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -20,10 +21,12 @@
     "express-validator": "^7.2.1",
     "formik": "^2.4.6",
     "helmet": "^8.1.0",
+    "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
+    "npm": "^11.4.2",
     "uuid": "^11.1.0",
     "yup": "^1.6.1"
   }

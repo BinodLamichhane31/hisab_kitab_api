@@ -4,6 +4,8 @@ const connectDB = require('./config/db');
 const userRoutes = require("./routes/userRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+
 
 dotenv.config();
 const PORT = process.env.PORT || 6060;
@@ -19,6 +21,7 @@ let corsOptions = {
  
 app.use(cors(corsOptions))
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth",userRoutes)
 
