@@ -15,11 +15,15 @@ const sendTokenToResponse = (user, statusCode, res) =>{
     options.secure = true
   }
 
+  const userResponse = { ...user.toObject() };
+  delete userResponse.password;
+
   res.status(statusCode)
     .cookie('token',token,options)
     .json({
       success:true,
-      message:"Login successful."
+      message:"Login successful.",
+      data: userResponse
     })
 
 }
@@ -123,6 +127,7 @@ exports.loginUser = async (req, res) => {
 exports.getProfile = async (req, res) => {
   res.status(200).json({
     success: true,
+    message:"Fetched profile data",
     data: req.user,
   });
 };
