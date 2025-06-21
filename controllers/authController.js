@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const fs = require("fs");
 
 const sendTokenToResponse = (user, statusCode, res) =>{
   const token = jwt.sign({id: user._id, role: user.role},process.env.JWT_SECRET,{
@@ -256,6 +257,20 @@ exports.uploadProfileImage = async (req, res) => {
       message: `Server error: ${error.message}`,
     });
   }
+};
+
+exports.viewProfileImage = (req, res) => {
+  const filename = req.params.filename;
+  const imagePath = path.join(__dirname, "..", "uploads", filename);
+
+  if (!fs.existsSync(imagePath)) {
+    return res.status(404).json({
+      success: false,
+      message: "Image not found.",
+    });
+  }
+
+  return res.sendFile(imagePath);
 };
 
 
