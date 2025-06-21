@@ -67,6 +67,34 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
+exports.getUserById = async (req,res) => {
+    try {
+        const user = await User.findById(req.params.id).select("-password")
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User data fetched.",
+            data: user
+        })
+
+
+        
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error: "+error
+        })
+        
+    }
+}
+
 exports.updateUserByAdmin = async (req, res) => {
   const { fname, lname, phone, role } = req.body;
   try {

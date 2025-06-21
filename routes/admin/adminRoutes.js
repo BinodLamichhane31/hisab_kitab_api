@@ -1,13 +1,13 @@
 const express = require('express')
 const { route } = require('../userRoutes')
-const { createUser, getAllUsers, updateUserByAdmin, deleteUserByAdmin, toggleUserStatus } = require('../../controllers/admin/userManagement')
+const { createUser, getAllUsers, updateUserByAdmin, deleteUserByAdmin, toggleUserStatus, getUserById } = require('../../controllers/admin/userManagement')
 const { registerValidation } = require('../../validator/authValidator')
 const validate = require('../../middlewares/validate')
 const { protect, authorize } = require('../../middlewares/authMiddleware')
 const router = express.Router()
 
 router.post(
-    '/create',
+    '/users',
     protect,
     authorize('admin'),
     registerValidation,
@@ -20,6 +20,13 @@ router.get(
     protect,
     authorize('admin'),
     getAllUsers
+)
+
+router.get(
+    '/users/:id',
+    protect,
+    authorize('admin'),
+    getUserById
 )
 
 router.put(
