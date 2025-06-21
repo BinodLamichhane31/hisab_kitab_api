@@ -167,6 +167,9 @@ exports.toggleUserStatus = async (req,res) =>{
 
         user.isActive = !user.isActive
         await user.save();
+
+        logger.info("[%s] %s toggled user %s status to: %s", req.user?.role, req.user?.email, user.email, user.isActive ? "active" : "inactive");
+
         return res.status(200).json({
             success: true, 
             message: `User ${user.isActive ? "enabled" : "disabled"}.` 
