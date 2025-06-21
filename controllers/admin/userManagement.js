@@ -46,7 +46,8 @@ exports.getAllUsers = async (req, res) => {
         const users = await User.find(searchQuery)
             .sort(sortBy)
             .skip(skip)
-            .limit(Number(limit));
+            .limit(Number(limit))
+            .select('-password');
 
         return res.status(200).json({
             success: true,
