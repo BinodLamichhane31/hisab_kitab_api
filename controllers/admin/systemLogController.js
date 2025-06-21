@@ -1,18 +1,48 @@
+// In your log controller file (e.g., controllers/logController.js)
+
 const SystemLog = require("../../models/SystemLogs");
 
 exports.getLogs = async (req, res) => {
   try {
-    const { level, limit = 50, skip = 0 } = req.query;
+    const { 
+      page = 1, 
+      limit = 15, 
+      level, 
+      search = "" 
+    } = req.query;
 
-    const query = level ? { level } : {};
+    const pageSize = parseInt(limit);
+    const skip = (parseInt(page) - 1) * pageSize;
 
-    const logs = await SystemLog.find(query)
-      .sort({ timestamp: -1 })
-      .skip(parseInt(skip))
-      .limit(parseInt(limit));
+    const query = {};
+    if (level) {
+      query.level = level; 
+    }
+    if (search) {
+      query.message = { $regex: search, $options: 'i' };
+    }
 
-    res.status(200).json({ success: true, data: logs });
+    const [logs, totalLogs] = await Promise.all([
+        SystemLog.find(query)
+            .sort({ timestamp: -1 })
+            .skip(skip)
+            .limit(pageSize),
+        SystemLog.countDocuments(query)
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Logs fetched successfully",
+      data: logs,
+      pagination: {
+        totalRecords: totalLogs,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalLogs / pageSize),
+        pageSize: pageSize,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error fetching logs", error: error.message });
+    console.error("Error fetching logs:", error);
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
