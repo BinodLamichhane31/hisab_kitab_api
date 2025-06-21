@@ -20,8 +20,7 @@ exports.createUser = async (req, res) => {
         const newUser = new User({ fname, lname, email, phone, password: hashedPassword });
         await newUser.save();
 
-        logger.info("New user created: %s", email);
-
+        logger.info("[%s] %s created a new user: %s", req.user?.role, req.user?.email, email);
         return res.status(201).json({ success: true, message: "New user added." });
     } catch (error) {
         return res.status(500).json({ success: false, message: "Server error" });
@@ -51,6 +50,8 @@ exports.getAllUsers = async (req, res) => {
             .skip(skip)
             .limit(Number(limit))
             .select('-password');
+        
+        // logger.info("[%s] %s fetched all user", req.user?.role, req.user?.email);
 
         return res.status(200).json({
             success: true,
@@ -81,6 +82,8 @@ exports.getUserById = async (req,res) => {
                 message: "User not found."
             })
         }
+
+        logger.info("[%s] %s viewed user with email: %s", req.user?.role, req.user?.email, req.params.email);
 
         return res.status(200).json({
             success: true,
@@ -113,6 +116,7 @@ exports.updateUserByAdmin = async (req, res) => {
         message: "User not found.",
       });
     }
+    logger.info("[%s] %s updated user: %s", req.user?.role, req.user?.email, updated.email);
     return res.status(200).json({
         success: true, 
         message: "User updated.", 
@@ -136,6 +140,8 @@ exports.deleteUserByAdmin = async (req, res) => {
         message: "User not found.",
       });
     }
+
+    logger.info("[%s] %s deleted user: %s", req.user?.role, req.user?.email, deletedUser.email);
 
     return res.status(200).json({
       success: true,
