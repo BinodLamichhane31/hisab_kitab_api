@@ -10,15 +10,14 @@ const logger = createLogger({
     format.json()
   ),
   transports: [
-    new transports.Console({
-      format: format.combine(format.colorize(), format.simple())
-    }),
+    // new transports.Console({
+    //   format: format.combine(format.colorize(), format.simple())
+    // }),
 
     new transports.MongoDB({
       db: process.env.MONGO_URI,
       collection: "systemlogs",
       level: "info",
-      options: { useUnifiedTopology: true },
       tryReconnect: true,
       capped: true,            
       cappedMax: 1000000      
