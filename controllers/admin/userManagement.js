@@ -1,5 +1,6 @@
 const User = require("../../models/User");
 const bcrypt = require("bcrypt");
+const logger = require("../../utils/logger");
 
 exports.createUser = async (req, res) => {
     const { fname, lname, email, phone, password } = req.body;
@@ -18,6 +19,8 @@ exports.createUser = async (req, res) => {
 
         const newUser = new User({ fname, lname, email, phone, password: hashedPassword });
         await newUser.save();
+
+        logger.info("New user created: %s", email);
 
         return res.status(201).json({ success: true, message: "New user added." });
     } catch (error) {

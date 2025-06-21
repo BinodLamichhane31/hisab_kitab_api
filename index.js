@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require("./routes/userRoutes")
 const adminRoutes = require("./routes/admin/adminRoutes")
+const logRoutes = require("./routes/admin/systemLogRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -27,6 +28,7 @@ app.use(cookieParser());
 
 app.use("/api/auth",userRoutes)
 app.use("/api/admin",adminRoutes)
+app.use("/api/admin",logRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
