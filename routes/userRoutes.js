@@ -1,9 +1,10 @@
 const express = require('express')
-const { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount, logout } = require('../controllers/authController')
+const { registerUser, loginUser, getProfile, updateProfile, changePassword, deleteAccount, logout, uploadProfileImage } = require('../controllers/authController')
 const { registerValidation, loginValidation } = require('../validator/authValidator')
 const validate = require('../middlewares/validate')
 const loginLimiter = require('../middlewares/loginLimiter')
 const { protect } = require('../middlewares/authMiddleware')
+const upload = require('../middlewares/upload')
 const router = express.Router()
 
 router.post(
@@ -51,6 +52,13 @@ router.post(
   "/logout",
   protect,
   logout
+)
+
+router.put(
+  "/upload-profile-image",
+  protect,
+  upload.single('image'),
+  uploadProfileImage
 )
 
 module.exports = router
