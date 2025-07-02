@@ -8,6 +8,7 @@ const shopRoutes = require("./routes/shopRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 
 dotenv.config();
@@ -26,6 +27,7 @@ let corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads",express.static(path.join(__dirname,'uploads')))
 
 app.use("/api/auth",userRoutes)
 app.use("/api/admin",adminRoutes)
