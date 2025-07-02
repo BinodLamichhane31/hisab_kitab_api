@@ -25,7 +25,7 @@ const sendTokenToResponse = (user, statusCode, res) =>{
     .json({
       success:true,
       message:"Login successful.",
-      data: userResponse
+      token
     })
 
 }
