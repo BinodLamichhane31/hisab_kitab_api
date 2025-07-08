@@ -3,8 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const fs = require("fs");
+const Shop = require("../models/Shop");
 
-const sendTokenToResponse = (user, statusCode, res) =>{
+const sendTokenToResponse = (user, statusCode, res, currentShop) =>{
   const token = jwt.sign({id: user._id, role: user.role},process.env.JWT_SECRET,{
     expiresIn:process.env.JWT_EXPIRE
   })
@@ -25,7 +26,11 @@ const sendTokenToResponse = (user, statusCode, res) =>{
     .json({
       success:true,
       message:"Login successful.",
-      data: userResponse,
+      data: {
+        user: userResponse,
+        shops: user.shops,
+        currentShopId : currentShop ? currentShop._id : null
+      },
       token,
     })
 
@@ -85,7 +90,7 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const getUser = await User.findOne({ email });
+    const getUser = await User.findOne({ email }).populate('shops');
     if (!getUser) {
       return res.status(404).json({ 
         success: false,
@@ -112,7 +117,17 @@ exports.loginUser = async (req, res) => {
     getUser.lastLogin = Date.now();
     await getUser.save({validateBeforeSave:false})
 
-    sendTokenToResponse(getUser,200,res)
+    let activeShop = null
+    if (getUser.shops && getUser.shops.length > 0) {
+      const lastShop = getUser.shops.find(s => s._id.equals(getUser.lastSelectedShop));
+      if (lastShop) {
+        activeShop = lastShop;
+      } else {
+        activeShop = getUser.shops[0];
+      }
+    }
+
+    sendTokenToResponse(getUser,200,res,activeShop)
 
     
   } catch (error) {
@@ -273,6 +288,41 @@ exports.viewProfileImage = (req, res) => {
   }
 
   return res.sendFile(imagePath);
+};
+
+// ... at the end of authController.js
+
+/**
+ * @desc    Set the user's active shop preference
+ * @route   POST /api/v1/auth/select-shop
+ * @access  Private
+ */
+exports.selectShop = async (req, res) => {
+  const { shopId } = req.body;
+  const userId = req.user._id;
+
+  try {
+    const shop = await Shop.findOne({ _id: shopId, owner: userId });
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: "Shop not found or you do not have permission to access it.",
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, { activeShop: shopId });
+
+    res.status(200).json({
+      success: true,
+      message: `Active shop set to ${shop.name}.`,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Server error: ${error.message}`,
+    });
+  }
 };
 
 

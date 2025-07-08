@@ -1,6 +1,7 @@
 const express = require('express')
 const { protect } = require('../middlewares/authMiddleware')
 const { createShop, getShops, getShopById, updateShop, deleteShop } = require('../controllers/shopController')
+const { selectShop } = require('../controllers/authController')
 const router = express.Router()
 
 router.post(
@@ -32,6 +33,12 @@ router.delete(
     protect,
     deleteShop
 )
+
+router.post(
+  "/select-shop",
+  protect,
+  selectShop
+);
 
 
 module.exports = router
