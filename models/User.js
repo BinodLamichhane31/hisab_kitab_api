@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema(
     },
     lastLogin: {
       type: Date
+    },
+    activeShop: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Shop'
     }
   },
   {
