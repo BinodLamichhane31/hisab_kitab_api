@@ -25,7 +25,8 @@ const sendTokenToResponse = (user, statusCode, res) =>{
     .json({
       success:true,
       message:"Login successful.",
-      token
+      data: userResponse,
+      token,
     })
 
 }
@@ -101,6 +102,7 @@ exports.loginUser = async (req, res) => {
 
     const checkPassword = await bcrypt.compare(password, getUser.password);
     if (!checkPassword) {
+      console.log("Password mismatch", password, getUser.password);
       return res.status(401).json({ 
         success: false,
         message: "Invalid Password",
