@@ -22,13 +22,13 @@ router.get(
 )
 
 router.put(
-    '/',
+    '/:customerId',
     protect,
     updateCustomer
 )
 
 router.delete(
-    '/',
+    '/:customerId',
     protect,
     deleteCustomer
 )

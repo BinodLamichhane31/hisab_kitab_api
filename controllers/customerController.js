@@ -9,6 +9,7 @@
 const { date } = require("yup");
 const Customer = require("../models/Customer");
 const Shop = require("../models/Shop");
+const { log } = require("winston");
 
 exports.addCustomer = async (req, res) =>{
     try {
@@ -61,7 +62,7 @@ exports.addCustomer = async (req, res) =>{
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Server error."
+            message: "Server error."+ error
         })
         
     }
@@ -105,6 +106,7 @@ exports.getCustomersByShop = async(req, res) =>{
         const sortBy = {[sortField]:sortOrder}
 
         const searchQuery = {
+            shop: shopId,
             $or: [
             { name: { $regex: search, $options: 'i' } },
             { phone: { $regex: search, $options: 'i' } },
@@ -177,6 +179,7 @@ exports.updateCustomer = async(req, res) =>{
     try {
         const {customerId} = req.params
         const {name, phone, address} = req.body
+        const userId = req.user._id
 
         const customer = await Customer.findById(customerId)
         if(!customer){
@@ -186,8 +189,20 @@ exports.updateCustomer = async(req, res) =>{
             })
         }
 
-        await getCustomersByShop(req,res,() => {}); 
-        if (res.headersSent) return; 
+        const shop = await Shop.findById(customer.shop);
+        if (!shop) {
+            return res.status(404).json({
+                success: false,
+                message: "Associated shop not found"
+            });
+        }
+
+        if (shop.owner.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to update this customer"
+            });
+        } 
 
         const updatedCustomer = await Customer.findByIdAndUpdate(
             customerId,
@@ -202,6 +217,8 @@ exports.updateCustomer = async(req, res) =>{
         })
         
     } catch (error) {
+        console.log(error);
+        
         return res.status(500).json({
             success: false,
             message: "Internal Server Error"
@@ -214,6 +231,8 @@ exports.updateCustomer = async(req, res) =>{
 exports.deleteCustomer = async (req, res) => {
     try {
         const {customerId} = req.params
+        const userId = req.user._id
+        
 
         const customer = await Customer.findById(customerId)
         if(!customer){
@@ -223,12 +242,28 @@ exports.deleteCustomer = async (req, res) => {
             })
         }
 
-        await getCustomersByShop(req,res,() => {}); 
-        if (res.headersSent) return; 
+        const shop = await Shop.findById(customer.shop);
+        if (!shop) {
+            return res.status(404).json({
+                success: false,
+                message: "Associated shop not found"
+            });
+        }
+
+        if (shop.owner.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to update this customer"
+            });
+        } 
         // Data Integrity
         // Transaction to be counted. if transaction of the customer is more than 1, prevent deletion
 
         await Customer.findByIdAndDelete(customerId);
+        return res.status(200).json({
+            success: true,
+            message: "Customer deleted."
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,
