@@ -90,7 +90,12 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const getUser = await User.findOne({ email }).populate('shops');
+    const getUser = await User.findOne({ email }).populate({
+      path: 'shops',
+      populate: {
+        path: 'owner',
+        select: 'fname lname email'
+      }})
     if (!getUser) {
       return res.status(404).json({ 
         success: false,
@@ -117,9 +122,13 @@ exports.loginUser = async (req, res) => {
     getUser.lastLogin = Date.now();
     await getUser.save({validateBeforeSave:false})
 
+    if(getUser.role === 'admin'){
+      sendTokenToResponse(getUser, 200, res, null)
+    }
+
     let activeShop = null
     if (getUser.shops && getUser.shops.length > 0) {
-      const lastShop = getUser.shops.find(s => s._id.equals(getUser.lastSelectedShop));
+      const lastShop = getUser.shops.find(s => s._id.equals(getUser.activeShop));
       if (lastShop) {
         activeShop = lastShop;
       } else {
@@ -144,11 +153,38 @@ exports.loginUser = async (req, res) => {
  * @access  Private
  */
 exports.getProfile = async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message:"Fetched profile data",
-    data: req.user,
-  });
+  
+  try {
+    const userWithDetails = await User.findById(req.user._id).populate({
+        path: 'shops',
+        populate: { 
+          path: 'owner',
+          select: 'fname lname email' 
+        }
+      })
+      .populate({ 
+        path: 'activeShop',
+        populate: {
+          path: 'owner',
+          select: 'fname lname email'
+        }
+      });
+
+    if (!userWithDetails) {
+        return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message:"Fetched profile data",
+      data: userWithDetails, 
+    });
+  } catch (error) {
+     return res.status(500).json({
+      success: false,
+      message: `Server error: ${error.message}`,
+    });
+  }
 };
 
 /**
@@ -290,31 +326,34 @@ exports.viewProfileImage = (req, res) => {
   return res.sendFile(imagePath);
 };
 
-// ... at the end of authController.js
 
-/**
- * @desc    Set the user's active shop preference
- * @route   POST /api/v1/auth/select-shop
- * @access  Private
- */
-exports.selectShop = async (req, res) => {
-  const { shopId } = req.body;
+exports.switchShop = async (req, res) => {
+  const { shopID } = req.body;
   const userId = req.user._id;
 
   try {
-    const shop = await Shop.findOne({ _id: shopId, owner: userId });
-    if (!shop) {
-      return res.status(404).json({
+    const user = await User.findById(userId);
+    
+    const shopIsValid = user.shops.some(s => s.equals(shopID));
+
+    if (!shopIsValid) {
+      return res.status(403).json({
         success: false,
-        message: "Shop not found or you do not have permission to access it.",
+        message: "You do not have permission to access this shop.",
       });
     }
 
-    await User.findByIdAndUpdate(userId, { activeShop: shopId });
+    user.activeShop = shopID;
+    await user.save({validateBeforeSave: false});
+    
+    const shop = await Shop.findById(shopID);
 
     res.status(200).json({
       success: true,
-      message: `Active shop set to ${shop.name}.`,
+      message: `Active shop switched to ${shop.name}.`,
+      data: {
+        currentShopId: shopID
+      }
     });
 
   } catch (error) {
