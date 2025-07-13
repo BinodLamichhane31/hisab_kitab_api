@@ -12,14 +12,15 @@ const Shop = require("../models/Shop");
 const { log } = require("winston");
 
 exports.addCustomer = async (req, res) =>{
-    try {
-        const {name, phone, address, shopId} = req.body
+    try {        
+        const {name, phone, email,address, shop:shopId} = req.body
         const userId = req.user._id
+        
 
-        if(!name || !phone || !shopId ){
+        if(!name || !phone || !shopId || !email){
             return res.status(400).json({
                 success: false,
-                message: "Customer name, phone and shops are required."
+                message: "Customer name, phone, email and shops are required."
             })
         }
 
@@ -50,6 +51,7 @@ exports.addCustomer = async (req, res) =>{
         const newCustomer = await Customer({
             name,
             phone,
+            email,
             address,
             shop: shopId
         })
@@ -141,7 +143,8 @@ exports.getCustomersByShop = async(req, res) =>{
 }
 
 exports.getCustomerById = async(req,res) =>{
-    try {
+    try {      
+                  
         const {customerId} = req.params
         const userId = req.user._id
 
@@ -178,7 +181,7 @@ exports.getCustomerById = async(req,res) =>{
 exports.updateCustomer = async(req, res) =>{
     try {
         const {customerId} = req.params
-        const {name, phone, address} = req.body
+        const {name, phone, email,address} = req.body
         const userId = req.user._id
 
         const customer = await Customer.findById(customerId)
@@ -206,7 +209,7 @@ exports.updateCustomer = async(req, res) =>{
 
         const updatedCustomer = await Customer.findByIdAndUpdate(
             customerId,
-            {$set: {name, phone, address}},
+            {$set: {name, phone,email ,address}},
             {new: true, runValidators:true}
         )
 
