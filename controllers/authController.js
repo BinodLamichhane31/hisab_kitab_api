@@ -328,12 +328,13 @@ exports.viewProfileImage = (req, res) => {
 
 
 exports.switchShop = async (req, res) => {
+  
   const { shopID } = req.body;
   const userId = req.user._id;
 
   try {
     const user = await User.findById(userId);
-    
+        
     const shopIsValid = user.shops.some(s => s.equals(shopID));
 
     if (!shopIsValid) {
