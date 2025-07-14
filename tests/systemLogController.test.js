@@ -29,7 +29,7 @@ describe("GET /api/admin/logs", () => {
         
         const loginRes = await request(app)
             .post("/api/auth/login")
-            .send({ email: "binodd1@gmail.com", password: "Binod@123" });
+            .send({ email: "test_admin@gmail.com", password: "TestAdmin@123" });
         
         authToken = loginRes.body.token; // Save the token for all tests in this block
 
