@@ -6,6 +6,7 @@ const adminRoutes = require("./routes/admin/adminRoutes")
 const logRoutes = require("./routes/admin/systemLogRoutes")
 const shopRoutes = require("./routes/shopRoutes")
 const customerRoutes = require("./routes/customerRoutes")
+const supplierRoutes = require("./routes/supplierRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -35,6 +36,7 @@ app.use("/api/admin",adminRoutes)
 app.use("/api/admin",logRoutes)
 app.use("/api/shops",shopRoutes)
 app.use("/api/customers",customerRoutes)
+app.use("/api/suppliers",supplierRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
