@@ -4,7 +4,7 @@ const User = require("../models/User");
 
 
 exports.createShop = async (req, res) =>{
-    try {
+    try {      
         const {name, address, contactNumber} = req.body
         if(!name){
             return res.status(400).json({
