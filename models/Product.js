@@ -37,7 +37,8 @@ const productSchema = new mongoose.Schema({
         ref: 'Shop',
         required: true,
         index: true,
-    }
+    },
+    image: { type: String, required: false } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

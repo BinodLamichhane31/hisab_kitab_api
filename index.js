@@ -12,7 +12,7 @@ const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-
+const bodyParser = require('body-parser');
 
 dotenv.config();
 const PORT = process.env.PORT || 6060;
@@ -20,16 +20,20 @@ const PORT = process.env.PORT || 6060;
 const app = express();
 app.use(helmet())
 
+
 connectDB();
 
 let corsOptions = {
     origin : 'http://localhost:5173',
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials:true
  }
  
 app.use(cors(corsOptions))
 app.use(express.json());
 app.use(cookieParser());
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended:true}))
 app.use("/uploads",express.static(path.join(__dirname,'uploads')))
 
 app.use("/api/auth",userRoutes)
