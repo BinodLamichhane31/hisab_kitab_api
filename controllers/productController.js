@@ -1,5 +1,8 @@
 const Product = require('../models/Product');
 const Shop = require('../models/Shop');
+const path = require('path');
+const fs = require("fs");
+
 
 const verifyShopOwner = async (shopId, userId) => {
     const shop = await Shop.findById(shopId);
@@ -32,6 +35,10 @@ exports.addProduct = async (req, res) => {
             reorderLevel,
             shop: shopId,
         });
+
+         if (req.file) {
+            newProduct.image = `/uploads/${req.file.filename}`;
+        }
 
         await newProduct.save();
 
@@ -116,11 +123,23 @@ exports.updateProduct = async (req, res) => {
 
         const { error, status } = await verifyShopOwner(product.shop, req.user._id);
         if (error) {
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             return res.status(status).json({ success: false, message: error });
         }
         
-        // Ensure shop cannot be changed
         delete updates.shop;
+
+        if (req.file) {
+            if (product.image) {
+                const oldImagePath = path.join(__dirname, '..', product.image);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            updates.image = `/uploads/${req.file.filename}`;
+        }
 
         const updatedProduct = await Product.findByIdAndUpdate(productId, { $set: updates }, { new: true, runValidators: true });
 
@@ -150,7 +169,13 @@ exports.deleteProduct = async (req, res) => {
         }
 
         // Add check here to prevent deletion if product is in transactions
-        // For now, we'll proceed with deletion.
+
+        if (product.image) {
+            const imagePath = path.join(__dirname, '..', product.image);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
         
         await Product.findByIdAndDelete(productId);
 
