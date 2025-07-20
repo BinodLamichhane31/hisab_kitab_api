@@ -22,7 +22,7 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error("Only JPG, PNG, and WEBP images are allowed."), false);
 };
 
-const upload = multer({
+const upload = multer({  
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter

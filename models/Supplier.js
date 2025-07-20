@@ -27,7 +27,7 @@ const supplierSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        currentBalance: {
+        amountOwed: {
             type: Number,
             required: true,
             default: 0
