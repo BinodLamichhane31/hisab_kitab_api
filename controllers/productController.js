@@ -17,6 +17,8 @@ const verifyShopOwner = async (shopId, userId) => {
 
 exports.addProduct = async (req, res) => {
     try {
+        console.log(req.body);
+        
         const { name, sellingPrice, purchasePrice, quantity, category, description, reorderLevel, shopId } = req.body;
         const userId = req.user._id;
 
@@ -33,7 +35,7 @@ exports.addProduct = async (req, res) => {
             category,
             description,
             reorderLevel,
-            shop: shopId,
+            shopId: shopId,
         });
 
          if (req.file) {
@@ -65,7 +67,7 @@ exports.getProductsByShop = async (req, res) => {
 
         const skip = (page - 1) * limit;
         const searchQuery = {
-            shop: shopId,
+            shopId: shopId,
             name: { $regex: search, $options: 'i' },
         };
 
@@ -99,7 +101,7 @@ exports.getProductById = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
 
-        const { error, status } = await verifyShopOwner(product.shop, req.user._id);
+        const { error, status } = await verifyShopOwner(product.shopId, req.user._id);
         if (error) {
             return res.status(status).json({ success: false, message: error });
         }
@@ -121,15 +123,15 @@ exports.updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
 
-        const { error, status } = await verifyShopOwner(product.shop, req.user._id);
+        const { error, status } = await verifyShopOwner(product.shopId, req.user._id);
         if (error) {
             if (req.file) {
                 fs.unlinkSync(req.file.path);
             }
             return res.status(status).json({ success: false, message: error });
         }
-        
-        delete updates.shop;
+        delete updates._id; 
+        delete updates.shopId;
 
         if (req.file) {
             if (product.image) {
@@ -163,7 +165,7 @@ exports.deleteProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
 
-        const { error, status } = await verifyShopOwner(product.shop, req.user._id);
+        const { error, status } = await verifyShopOwner(product.shopId, req.user._id);
         if (error) {
             return res.status(status).json({ success: false, message: error });
         }

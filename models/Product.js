@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 5, 
     },
-    shop: {
+    shopId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Shop',
         required: true,

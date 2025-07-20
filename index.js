@@ -18,16 +18,32 @@ dotenv.config();
 const PORT = process.env.PORT || 6060;
 
 const app = express();
-app.use(helmet())
-
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false, 
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin requests
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "blob:", "http://localhost:6060", "http://localhost:5173"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        connectSrc: ["'self'", "http://localhost:6060", "http://localhost:5173"],
+      },
+    },
+  })
+);
 
 connectDB();
 
 let corsOptions = {
-    origin : 'http://localhost:5173',
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials:true
- }
+    origin: ['http://localhost:5173', 'http://localhost:3000'], 
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    credentials: true,
+    optionsSuccessStatus: 200, 
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Content-Length', 'Content-Type']
+}
  
 app.use(cors(corsOptions))
 app.use(express.json());
