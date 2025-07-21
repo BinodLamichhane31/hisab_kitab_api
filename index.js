@@ -8,6 +8,7 @@ const shopRoutes = require("./routes/shopRoutes")
 const customerRoutes = require("./routes/customerRoutes")
 const supplierRoutes = require("./routes/supplierRoutes")
 const productRoutes = require("./routes/productRoutes")
+const saleRoutes = require("./routes/saleRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -59,6 +60,7 @@ app.use("/api/shops",shopRoutes)
 app.use("/api/customers",customerRoutes)
 app.use("/api/suppliers",supplierRoutes)
 app.use("/api/products",productRoutes)
+app.use("/api/sales",saleRoutes)
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
