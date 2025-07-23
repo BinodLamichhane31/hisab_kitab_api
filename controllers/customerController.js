@@ -79,7 +79,7 @@ exports.getCustomersByShop = async(req, res) =>{
     // sorting, searching and paginations 
     // respond with data
     try {
-        const {page =1, limit = 10, search = "", shopId} = req.query
+        const {search = "", shopId} = req.query
         const userId = req.user._id;
 
         if(!shopId){
@@ -102,7 +102,6 @@ exports.getCustomersByShop = async(req, res) =>{
                 message: "Not authorized to view this customers of this shop."
             })
         }
-        const skip = (page -1) *limit
         const sortField = req.query.sortField || 'createdAt'
         const sortOrder = req.query.sortOrder === 'asc' ? 1: -1;
         const sortBy = {[sortField]:sortOrder}
@@ -119,19 +118,11 @@ exports.getCustomersByShop = async(req, res) =>{
 
         const customers = await Customer.find(searchQuery)
             .sort(sortBy)
-            .skip(skip)
-            .limit(Number(limit))
         
         return res.status(200).json({
             success: true,
             message: "Customers fetched",
             data: customers,
-            pagination: {
-                totalCustomers,
-                currentPage: Number(page),
-                totalPages: Math.ceil(totalCustomers/limit),
-                limit: Number(limit)
-            }
     });
     } catch (error) {
         return res.status(500).json({

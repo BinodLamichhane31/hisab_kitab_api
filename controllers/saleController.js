@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const Customer = require('../models/Customer');
 const Shop = require('../models/Shop');
 const Transaction = require('../models/Transaction');
+const { query } = require('winston');
 
 const verifyShopOwner = async (shopId, userId) => {
     const shop = await Shop.findById(shopId);
@@ -136,7 +137,7 @@ exports.getSales = async (req, res) => {
 
         const sales = await Sale.find(query)
             .populate('customer', 'name phone') 
-            .sort({ saleDate: -1 })
+            .sort({createdAt: -1, saleDate: -1})
             .skip((page - 1) * limit)
             .limit(Number(limit));
 
@@ -254,7 +255,7 @@ exports.cancelSale = async (req, res) => {
 };
 
 
-exports.recordPaymentForSale = async (req, res) => {
+exports.recordPaymentForSale = async (req, res) => {    
     const { id } = req.params;
     const { amountPaid, paymentMethod } = req.body;
     const userId = req.user._id;
@@ -302,3 +303,4 @@ exports.recordPaymentForSale = async (req, res) => {
         session.endSession();
     }
 };
+

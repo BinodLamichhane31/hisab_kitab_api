@@ -62,7 +62,7 @@ exports.addSupplier = async (req, res) =>{
 
 exports.getSuppliersByShop = async(req, res) =>{
     try {
-        const {page =1, limit = 10, search = "", shopId} = req.query
+        const {search = "", shopId} = req.query
         const userId = req.user._id;
 
         if(!shopId){
@@ -85,7 +85,6 @@ exports.getSuppliersByShop = async(req, res) =>{
                 message: "Not authorized to view this Suppliers of this shop."
             })
         }
-        const skip = (page -1) *limit
         const sortField = req.query.sortField || 'createdAt'
         const sortOrder = req.query.sortOrder === 'asc' ? 1: -1;
         const sortBy = {[sortField]:sortOrder}
@@ -98,23 +97,14 @@ exports.getSuppliersByShop = async(req, res) =>{
             ]
         };
 
-        const totalSuppliers = await Supplier.countDocuments(searchQuery)
 
         const suppliers = await Supplier.find(searchQuery)
             .sort(sortBy)
-            .skip(skip)
-            .limit(Number(limit))
         
         return res.status(200).json({
             success: true,
             message: "Suppliers fetched",
-            data: suppliers,
-            pagination: {
-                totalSuppliers,
-                currentPage: Number(page),
-                totalPages: Math.ceil(totalSuppliers/limit),
-                limit: Number(limit)
-            }
+            data: suppliers
     });
     } catch (error) {
         return res.status(500).json({
