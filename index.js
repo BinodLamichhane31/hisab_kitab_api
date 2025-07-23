@@ -9,11 +9,13 @@ const customerRoutes = require("./routes/customerRoutes")
 const supplierRoutes = require("./routes/supplierRoutes")
 const productRoutes = require("./routes/productRoutes")
 const saleRoutes = require("./routes/saleRoutes")
+const purchaseRoutes = require("./routes/purchaseRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const bodyParser = require('body-parser');
+
 
 dotenv.config();
 const PORT = process.env.PORT || 6060;
@@ -22,7 +24,7 @@ const app = express();
 app.use(
   helmet({
     crossOriginEmbedderPolicy: false, 
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin requests
+    crossOriginResourcePolicy: { policy: "cross-origin" }, 
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -61,6 +63,8 @@ app.use("/api/customers",customerRoutes)
 app.use("/api/suppliers",supplierRoutes)
 app.use("/api/products",productRoutes)
 app.use("/api/sales",saleRoutes)
+app.use("/api/purchases",purchaseRoutes)
+
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -4,12 +4,12 @@ const {
     getSales,
     recordPaymentForSale,
     getSaleById,
-    cancelSale
+    cancelSale,
+    getTransactions
 } = require('../controllers/saleController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
-router.use(protect);
 
 router.post(
     "/",
@@ -24,6 +24,7 @@ router.get(
 )
 router.get('/:id',protect,getSaleById)
 router.put('/:id/cancel', protect,cancelSale); 
-router.put('/:id/payment', recordPaymentForSale);
+router.put('/:id/payment', protect,recordPaymentForSale);
+
 
 module.exports = router;

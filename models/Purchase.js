@@ -26,7 +26,7 @@ const purchaseItemSchema = new mongoose.Schema({
 }, { _id: false });
 
 const purchaseSchema = new mongoose.Schema({
-    billNumber: {
+    billNumber: { 
         type: String,
         required: true
     },
@@ -39,10 +39,24 @@ const purchaseSchema = new mongoose.Schema({
     supplier: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Supplier',
-        required: true,
-        index: true
+        index: true 
     },
+    purchaseType: {
+        type: String,
+        enum: ['SUPPLIER', 'CASH'],
+        required: true
+    },
+    
     items: [purchaseItemSchema],
+    
+    subTotal: {
+        type: Number,
+        required: true
+    },
+    discount: { 
+        type: Number,
+        default: 0
+    },
     grandTotal: {
         type: Number,
         required: true
@@ -66,6 +80,11 @@ const purchaseSchema = new mongoose.Schema({
         default: Date.now,
         index: true
     },
+    status: {
+        type: String,
+        enum: ['COMPLETED', 'CANCELLED'],
+        default: 'COMPLETED'
+    },
     notes: {
         type: String,
         trim: true
@@ -81,7 +100,8 @@ purchaseSchema.pre('validate', function(next) {
         item.total = item.quantity * item.unitCost;
     });
 
-    this.grandTotal = this.items.reduce((acc, item) => acc + item.total, 0);
+    this.subTotal = this.items.reduce((acc, item) => acc + item.total, 0);
+    this.grandTotal = this.subTotal - this.discount; // Purchases typically don't have tax added at this stage
     this.amountDue = this.grandTotal - this.amountPaid;
 
     if (this.amountDue <= 0) {
