@@ -56,7 +56,7 @@ exports.createPurchase = async (req, res) => {
         }));
 
         const newPurchaseData = {
-            billNumber: billNumber || `CASH-PURCHASE-${Date.now()}`,
+            billNumber: billNumber || `PURCHASE-${Date.now()}`,
             shop: shopId,
             items: processedItems,
             discount,
@@ -123,7 +123,7 @@ exports.getPurchases = async (req, res) => {
 
         const purchases = await Purchase.find(query)
             .populate('supplier', 'name phone')
-            .sort({ purchaseDate: -1 })
+            .sort({createdAt: -1, purchaseDate: -1})
             .skip((page - 1) * limit)
             .limit(Number(limit));
 
