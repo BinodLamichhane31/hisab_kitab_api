@@ -20,6 +20,7 @@ const purchaseRoutes = require("./routes/purchaseRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const cashRoutes = require("./routes/cashRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 dotenv.config();
 connectDB();
@@ -61,6 +62,7 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/cash", cashRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 const userSockets = new Map();

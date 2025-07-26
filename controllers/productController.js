@@ -17,7 +17,6 @@ const verifyShopOwner = async (shopId, userId) => {
 
 exports.addProduct = async (req, res) => {
     try {
-        console.log(req.body);
         
         const { name, sellingPrice, purchasePrice, quantity, category, description, reorderLevel, shopId } = req.body;
         const userId = req.user._id;

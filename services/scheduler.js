@@ -102,7 +102,7 @@ const checkDuePayments = async (io) => {
 exports.initScheduledJobs = (io) => {
     // For production, once a day at a specific time, e.g., 2 AM ('0 2 * * *')
     // For testing, every minute ('* * * * *')
-    cron.schedule('0 6 * * *', () => {
+    cron.schedule('* * * * *', () => {
         console.log("--- Running Daily Notification Checks ---");
         checkLowStock(io);
         checkOverdueCollections(io);
