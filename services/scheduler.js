@@ -28,7 +28,7 @@ const checkLowStock = async (io) => {
         const lowStockProducts = await Product.find({ 
             $expr: { $lte: ["$quantity", "$reorderLevel"] } 
         }).populate({ path: 'shopId', select: 'owner' });
-
+        
         for (const product of lowStockProducts) {
             if (product.shopId?.owner) {
                 await createAndEmitNotification(io, {
@@ -100,9 +100,9 @@ const checkDuePayments = async (io) => {
 };
 
 exports.initScheduledJobs = (io) => {
-    // For production, run once a day at a specific time, e.g., 2 AM ('0 2 * * *')
-    // For testing, you can run it more frequently, e.g., every minute ('* * * * *')
-    cron.schedule('* * * * *', () => {
+    // For production, once a day at a specific time, e.g., 2 AM ('0 2 * * *')
+    // For testing, every minute ('* * * * *')
+    cron.schedule('0 6 * * *', () => {
         console.log("--- Running Daily Notification Checks ---");
         checkLowStock(io);
         checkOverdueCollections(io);
