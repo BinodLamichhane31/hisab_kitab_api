@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); 
 
-exports.protect = async (req, res, next) => {
-    console.log("Hitting protect:", req.body);
-    
+exports.protect = async (req, res, next) => {    
     let token;
 
     if (req.cookies.token) {
@@ -35,7 +33,6 @@ exports.protect = async (req, res, next) => {
         }
 
         req.user = currentUser;
-        console.log(currentUser);
         
         next();
     } catch (error) {

@@ -116,14 +116,13 @@ exports.getTransactions = async (req, res) => {
 
         const sortOptions = {};
         sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
-
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const transactions = await Transaction.find(query)
             .populate('relatedCustomer', 'name')
             .populate('relatedSupplier', 'name')
             .populate('createdBy', 'fname lname')
-            .sort(sortOptions)
+            .sort({createdAt: -1, transactionDate: -1})
             .skip(skip)
             .limit(parseInt(limit));
         

@@ -12,6 +12,7 @@ const saleRoutes = require("./routes/saleRoutes")
 const purchaseRoutes = require("./routes/purchaseRoutes")
 const transactionRoutes = require("./routes/transactionRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
+const cashRoutes = require("./routes/cashRoutes")
 const helmet = require('helmet')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -68,6 +69,7 @@ app.use("/api/sales",saleRoutes)
 app.use("/api/purchases",purchaseRoutes)
 app.use("/api/transactions",transactionRoutes)
 app.use("/api/dashboard",dashboardRoutes)
+app.use("/api/cash",cashRoutes)
 
 
 app.listen(PORT, () => {
