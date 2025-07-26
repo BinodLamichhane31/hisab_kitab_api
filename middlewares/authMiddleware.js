@@ -1,13 +1,15 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User'); 
 
-exports.protect = async (req, res, next) => {
+exports.protect = async (req, res, next) => {    
     let token;
 
     if (req.cookies.token) {
         token = req.cookies.token;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+        console.log(token);
+        
     }
 
     if (!token) {
@@ -31,6 +33,7 @@ exports.protect = async (req, res, next) => {
         }
 
         req.user = currentUser;
+        
         next();
     } catch (error) {
         console.error(error);
