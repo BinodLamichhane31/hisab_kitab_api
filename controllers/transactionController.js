@@ -56,6 +56,8 @@ exports.createTransaction = async (req, res) => {
     }
 };
 
+// ... other imports: Transaction, verifyShopOwner, etc. ...
+
 exports.getTransactions = async (req, res) => {
     try {
         const {
@@ -68,7 +70,9 @@ exports.getTransactions = async (req, res) => {
             type, 
             category,
             startDate,
-            endDate
+            endDate,
+            relatedCustomer, // Renamed for clarity to match the model field
+            relatedSupplier, // Renamed for clarity to match the model field
         } = req.query;
 
         if (!shopId) {
@@ -80,14 +84,30 @@ exports.getTransactions = async (req, res) => {
             return res.status(status).json({ success: false, message: error });
         }
 
+        // Base query always filters by shop
         const query = { shop: shopId };
 
+        // Apply filters if they are provided in the request
         if (search) {
             query.description = { $regex: search, $options: 'i' };
         }
+        if (type) {
+            query.type = type;
+        }
+        if (category) {
+            query.category = category;
+        }
 
-        if (type) query.type = type;
-        if (category) query.category = category;
+        // --- THE FIX IS HERE ---
+        // Add the customer or supplier ID to the query if it exists
+        if (relatedCustomer) {
+            query.relatedCustomer = relatedCustomer;
+        }
+        if (relatedSupplier) {
+            query.relatedSupplier = relatedSupplier;
+        }
+        // --- END FIX ---
+
         if (startDate || endDate) {
             query.transactionDate = {};
             if (startDate) query.transactionDate.$gte = new Date(startDate);
@@ -111,7 +131,6 @@ exports.getTransactions = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            limit: transactions.length,
             pagination: {
                 currentPage: parseInt(page),
                 totalPages: Math.ceil(totalTransactions / limit),
