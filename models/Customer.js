@@ -31,6 +31,11 @@ const customerSchema = new mongoose.Schema(
             type: Number,
             required: true,
             default: 0
+        },
+        totalSpent: {
+            type: Number,
+            required: true,
+            default: 0
         }
     },
     {

@@ -77,22 +77,18 @@ exports.createSale = async (req, res) => {
         };
         
         const newSale = new Sale(newSaleData);
-        // The pre-validate hook will calculate all totals before saving
         await newSale.save({ session });
         
-        // 5. Perform post-sale logic based on sale type
         if (!isCashSale) {
-            // For CUSTOMER sales, update their credit balance
             customer.currentBalance += newSale.amountDue;
+            customer.totalSpent += newSale.amountPaid; 
             await customer.save({ session });
         } else {
-            // For CASH sales, enforce that they must be fully paid
             if (newSale.amountDue > 0) {
                 throw new Error('Cash sales must be paid in full. Amount due cannot be greater than zero.');
             }
         }
 
-        // 6. Log the financial transaction
         if (newSale.amountPaid > 0) {
             const transactionData = {
                 shop: shopId,
@@ -223,6 +219,7 @@ exports.cancelSale = async (req, res) => {
             const customer = await Customer.findById(sale.customer).session(session);
             if (customer) {
                 customer.currentBalance -= sale.amountDue;
+                customer.totalSpent -= sale.amountPaid;
                 await customer.save({ session });
             }
         }
@@ -277,6 +274,7 @@ exports.recordPaymentForSale = async (req, res) => {
 
         sale.amountPaid += amountPaid;
         customer.currentBalance -= amountPaid;
+        customer.totalSpent += amountPaid;
         
         await sale.save({ session }); 
         await customer.save({ session });

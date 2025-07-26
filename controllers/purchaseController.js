@@ -73,6 +73,7 @@ exports.createPurchase = async (req, res) => {
 
         if (!isCashPurchase) {
             supplier.currentBalance += newPurchase.amountDue;
+            supplier.totalSupplied += newPurchase.amountPaid
             await supplier.save({ session });
         } else {
             if (newPurchase.amountDue > 0) {
@@ -202,6 +203,7 @@ exports.recordPaymentForPurchase = async (req, res) => {
 
         purchase.amountPaid += amountPaid;
         supplier.currentBalance -= amountPaid;
+        supplier.totalSupplied += amountPaid;
 
         await purchase.save({ session });
         await supplier.save({ session });
@@ -260,6 +262,7 @@ exports.cancelPurchase = async (req, res) => {
             const supplier = await Supplier.findById(purchase.supplier).session(session);
             if (supplier) {
                 supplier.currentBalance -= purchase.amountDue;
+                supplier.totalSupplied -= purchase.amountPaid
                 await supplier.save({ session });
             }
         }

@@ -1,18 +1,11 @@
-const mongoose = require('mongoose'); // <-- STEP 1: Import Mongoose
+const mongoose = require('mongoose'); 
 const Customer = require('../models/Customer');
 const Supplier = require('../models/Supplier');
 const Sale = require('../models/Sale');
 const Purchase = require('../models/Purchase');
-// Assuming you have a verifyShopOwner helper. If it's in the same file, that's fine too.
 const { verifyShopOwner } = require('../utils/verifyShopOwner'); 
 
-// ... verifyShopOwner function if it's here ...
 
-/**
- * @desc    Get key statistics for the dashboard stat cards.
- * @route   GET /api/v1/dashboard/stats
- * @access  Private
- */
 exports.getDashboardStats = async (req, res) => {
     try {
         const { shopId } = req.query;
@@ -21,7 +14,6 @@ exports.getDashboardStats = async (req, res) => {
         const { error, status } = await verifyShopOwner(shopId, userId);
         if (error) return res.status(status).json({ success: false, message: error });
 
-        // STEP 2: Convert the string ID to a MongoDB ObjectId
         const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
         const [
@@ -33,7 +25,6 @@ exports.getDashboardStats = async (req, res) => {
             Customer.countDocuments({ shop: shopObjectId }),
             Supplier.countDocuments({ shop: shopObjectId }),
             Customer.aggregate([
-                // STEP 3: Use the converted ObjectId in the $match stage
                 { $match: { shop: shopObjectId } },
                 { $group: { _id: null, total: { $sum: "$currentBalance" } } }
             ]),
@@ -58,11 +49,7 @@ exports.getDashboardStats = async (req, res) => {
     }
 };
 
-/**
- * @desc    Get aggregated data for the sales vs purchases chart.
- * @route   GET /api/v1/dashboard/chart
- * @access  Private
- */
+
 exports.getChartData = async (req, res) => {
     try {
         const { shopId } = req.query;
@@ -71,7 +58,6 @@ exports.getChartData = async (req, res) => {
         const { error, status } = await verifyShopOwner(shopId, userId);
         if (error) return res.status(status).json({ success: false, message: error });
 
-        // Convert string ID to ObjectId here as well
         const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
         const twelveMonthsAgo = new Date();
@@ -81,7 +67,6 @@ exports.getChartData = async (req, res) => {
 
         const [salesData, purchasesData] = await Promise.all([
             Sale.aggregate([
-                // Use the converted ObjectId
                 { $match: { shop: shopObjectId, status: 'COMPLETED', saleDate: { $gte: twelveMonthsAgo } } },
                 { $group: { 
                     _id: { year: { $year: "$saleDate" }, month: { $month: "$saleDate" } },
@@ -90,7 +75,6 @@ exports.getChartData = async (req, res) => {
                 { $sort: { "_id.year": 1, "_id.month": 1 } }
             ]),
             Purchase.aggregate([
-                // Use the converted ObjectId
                 { $match: { shop: shopObjectId, status: 'COMPLETED', purchaseDate: { $gte: twelveMonthsAgo } } },
                 { $group: {
                     _id: { year: { $year: "$purchaseDate" }, month: { $month: "$purchaseDate" } },
@@ -100,10 +84,8 @@ exports.getChartData = async (req, res) => {
             ])
         ]);
 
-        // ... (The rest of the data formatting logic remains the same)
         const chartData = [];
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        // ...
         
         for (let i = 11; i >= 0; i--) {
             const date = new Date();

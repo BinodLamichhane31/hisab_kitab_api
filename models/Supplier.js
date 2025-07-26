@@ -31,6 +31,11 @@ const supplierSchema = new mongoose.Schema(
             type: Number,
             required: true,
             default: 0
+        },
+        totalSupplied: {
+            type: Number,
+            required: true,
+            default: 0
         }
     },
     {
