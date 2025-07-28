@@ -65,6 +65,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/cash", cashRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/bot", botRoutes);
 app.use("/api/payments", paymentRoutes);
 
 
