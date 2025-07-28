@@ -1,5 +1,22 @@
 const { default: mongoose } = require("mongoose");
 
+const subscriptionSchema = new mongoose.Schema({
+    plan: {
+        type: String,
+        enum: ['FREE', 'PRO'],
+        default: 'FREE'
+    },
+    status: {
+        type: String,
+        enum: ['ACTIVE', 'INACTIVE', 'EXPIRED'],
+        default: 'ACTIVE'
+    },
+    expiresAt: {
+        type: Date,
+        default: () => new Date(new Date().setFullYear(new Date().getFullYear() + 100)) 
+    }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema(
   {
     fname: {
@@ -41,6 +58,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    subscription: {
+        type: subscriptionSchema,
+        default: () => ({}) 
     },
     isActive: {
       type: Boolean,
