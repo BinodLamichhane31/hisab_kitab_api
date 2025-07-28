@@ -33,7 +33,7 @@ exports.hisabAssistant = async (req, res) => {
         const queryResponse = await index.query({ topK: 4, vector: queryEmbedding.embedding.values, includeMetadata: true });
         const knowledgeBaseContext = queryResponse.matches.map(match => match.metadata.text).join("\n\n---\n\n");
 
-        const systemInstruction = `You are "Hisab Assistant", an expert AI for the "Hisab Kitab" bookkeeping app in Nepal.
+        const systemInstruction = `You are "Hisab Assistant", an expert AI for the "Hisab Kitab" bookkeeping app in Nepal, you are developed by Binod Lamichhane..
         - Your persona is helpful, professional, and concise.
         - RESPOND IN THE ENGLISH LANGUAGE if the question is in english. If the question is asked in nepali or user says "REPLY IN NEPALI" or mixed (english+nepali), respond in the nepali language.
         - PRIORITIZE answering questions using the "USER'S FINANCIAL DATA". This is their live data.
