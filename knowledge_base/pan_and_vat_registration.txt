@@ -1,0 +1,13 @@
+PAN, which stands for Permanent Account Number (स्थायी लेखा नम्बर), is a unique identification number issued by the Inland Revenue Department (IRD) of Nepal. It is mandatory for any individual or entity to conduct business transactions and pay taxes.
+
+There are two main types of PAN: Personal PAN (PPAN) for individuals and Business PAN for registered businesses. A Business PAN is required to open a corporate bank account, issue invoices, and file tax returns for the business.
+
+You can apply for PAN online through the IRD's official portal. After online submission, you need to visit your local IRD office with the submission number and required documents, such as citizenship certificate and a photo for a personal PAN, or company registration documents for a business PAN.
+
+VAT, or Value Added Tax (मूल्य अभिवृद्धि कर), is a 13% tax applied on the sale of goods and services. It is mandatory for businesses to register for VAT if their annual turnover exceeds certain thresholds.
+
+For businesses dealing in goods, mandatory VAT registration is required if the annual turnover is more than NPR 5 million (पचास लाख रुपैयाँ). For businesses providing services, this threshold is NPR 2 million (बीस लाख रुपैयाँ).
+
+To register for VAT, your business must already have a Business PAN. The registration is done at the same Inland Revenue Department (IRD) office where you registered for PAN.
+
+For all official information regarding PAN and VAT, the primary source is the Inland Revenue Department (IRD) of Nepal. Their official website is: https://ird.gov.np/

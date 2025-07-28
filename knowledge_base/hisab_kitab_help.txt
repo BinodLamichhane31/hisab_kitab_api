@@ -1,0 +1,11 @@
+Hisab Kitab is a digital bookkeeping system designed to help Nepali businesses manage their finances easily. It allows you to track sales, purchases, customers, and suppliers all in one place.
+
+To record a new sale in the Hisab Kitab app, navigate to the "Sales" page from the main sidebar and click the "+ Create Sale" button. You can then add products and specify whether it is a cash sale or a credit sale to a customer.
+
+To record a new purchase, go to the "Purchases" page from the sidebar and click "+ Create Purchase". This allows you to track expenses and update your product stock levels automatically.
+
+The Dashboard is the main overview of your business. It shows key statistics like your total receivable amount (money customers owe you) and total payable amount (money you owe to suppliers).
+
+The chart on the Dashboard provides a visual summary of your sales and purchases over the last 12 months. This helps you understand your business trends and performance at a glance.
+
+You can manage your customers and their outstanding balances in the "Customers" section. Similarly, the "Suppliers" section allows you to track your payables and supplier information.

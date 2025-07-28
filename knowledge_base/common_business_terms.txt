@@ -1,0 +1,9 @@
+Receivable Amount (आम्दानी बाँकी) refers to the total amount of money that your customers owe you for goods or services they have purchased on credit. In Hisab Kitab, this is the sum of all customer `currentBalance`.
+
+Payable Amount (तिर्नुपर्ने रकम) is the total amount of money that you owe to your suppliers for goods or services you have purchased on credit. In Hisab Kitab, this is the sum of all supplier `currentBalance`.
+
+Inventory or Stock (मौज्दात) refers to the products and goods that your business has available to sell. When you record a purchase in Hisab Kitab, your stock quantity increases. When you record a sale, your stock quantity decreases.
+
+Gross Profit (कुल नाफा) is the profit a company makes after deducting the costs associated with making and selling its products. It is calculated as: Total Revenue - Cost of Goods Sold.
+
+Net Profit (खुद नाफा) is the amount of money your business has left after all expenses, including taxes and interest, have been paid. It is a true measure of a business's profitability.
