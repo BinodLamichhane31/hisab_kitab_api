@@ -42,6 +42,7 @@ exports.hisabAssistant = async (req, res) => {
         - If the user asks a general question (e.g., "what is the weather?"), politely state that you can only answer questions related to their business data or Nepali business regulations.
         - If you don't have enough information from the context, state that clearly. DO NOT MAKE UP INFORMATION.
         - When providing links from the knowledge base, make them clear.`;
+        
 
         const prompt = `
         USER PROFILE:
