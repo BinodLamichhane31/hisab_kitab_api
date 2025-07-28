@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { Pinecone } = require('@pinecone-database/pinecone');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, './.env') });
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const pinecone = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY,
@@ -33,13 +33,21 @@ async function seedDatabase() {
             const batchChunks = chunks.slice(i, i + batchSize);
             console.log(`  Embedding batch starting at chunk ${i + 1}...`);
 
-            const embeddings = await embeddingModel.batchEmbedContents({
-                requests: batchChunks.map(chunk => ({ content: chunk }))
-            });
+    
+            const requests = batchChunks.map(chunk => ({
+                content: {
+                    parts: [{ text: chunk }],
+                },
+                taskType: "RETRIEVAL_DOCUMENT",
+            }));
+            
+            const result = await embeddingModel.batchEmbedContents({ requests });
+
+            const embeddings = result.embeddings;
 
             const vectors = batchChunks.map((chunk, j) => ({
                 id: `${file}-chunk-${i + j}`,
-                values: embeddings.embeddings[j].values,
+                values: embeddings[j].values,
                 metadata: { source: file, text: chunk }
             }));
 
