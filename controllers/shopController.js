@@ -6,6 +6,7 @@ const User = require("../models/User");
 exports.createShop = async (req, res) =>{
     try {      
         const {name, address, contactNumber} = req.body
+        const userId = req.user._id
         if(!name){
             return res.status(400).json({
                 success: false,
@@ -13,16 +14,27 @@ exports.createShop = async (req, res) =>{
             })
         }
 
+        const user = await User.findById(userId).populate('shops');
+        const currentShopCount = user.shops.length;
+        const userPlan = user.subscription.plan;
+        if (userPlan === 'FREE' && currentShopCount >= 2) {
+            return res.status(403).json({
+                success: false,
+                message: "You have reached the 2-shop limit for the Free plan. Please upgrade to Pro to add more shops."
+            });
+        }
+
         const newShop = await Shop({
             name,
             address,
             contactNumber,
-            owner: req.user._id
+            owner: userId
         })
 
         await newShop.save();
 
-        await User.findByIdAndUpdate(req.user._id,{$push: {shops:newShop._id}})
+       user.shops.push(newShop._id);
+       await user.save()
 
         return res.status(201).json({
             success:true,
