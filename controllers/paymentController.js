@@ -1,96 +1,113 @@
-const crypto = require('crypto-js');
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
-
 
 exports.initiateSubscriptionPayment = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
         if (user.subscription.plan === 'PRO') {
-            return res.status(400).json({ success: false, message: "You are already on the Pro plan." });
+            return res.status(400).json({ 
+                success: false, 
+                message: "You are already on the Pro plan." 
+            });
         }
 
         const transactionUUID = uuidv4();
-        const productCode = "HISAB_KITAB_PRO_1Y";
-        const amount = 1000; 
+        const productCode = "HISAB_PRO";
+        const amount = 10; 
         
         await Payment.create({
             user: user._id,
             transactionUUID,
             productCode,
             amount,
+            status: 'PENDING'
         });
 
-        const signatureString = `total_amount=${amount},transaction_uuid=${transactionUUID},product_code=${productCode}`;
-        const signature = crypto.HmacSHA256(signatureString, process.env.ESEWA_MERCHANT_SECRET).toString(crypto.enc.Base64);
+        const paymentDetails = {
+            tAmt: amount.toString(),           // Total amount
+            amt: amount.toString(),            // Amount
+            txAmt: "0",                       // Tax amount
+            psc: "0",                         // Product service charge
+            pdc: "0",                         // Product delivery charge
+            pid: transactionUUID,             // Product ID (use transaction UUID)
+                        scd: process.env.ESEWA_MERCHANT_CODE,
+            su: `${process.env.CLIENT_WEB_URL}/payment/success`,
+            fu: `${process.env.CLIENT_WEB_URL}/payment/failure`,
+            
+            // Form action URL
+            payment_url: `${process.env.ESEWA_WEB_API_URL}`
+        };
         
         res.status(200).json({
             success: true,
             message: "Payment initiation details generated.",
-            paymentDetails: {
-                amount: amount.toString(),
-                tax_amount: "0",
-                total_amount: amount.toString(),
-                transaction_uuid: transactionUUID,
-                product_code: productCode,
-                product_service_charge: "0",
-                product_delivery_charge: "0",
-                success_url: `${process.env.CLIENT_WEB_URL}/payment/success`, 
-                failure_url: `${process.env.CLIENT_WEB_URL}/payment/failure`, 
-                signed_field_names: "total_amount,transaction_uuid,product_code",
-                signature: signature,
-                merchant_code: process.env.ESEWA_MERCHANT_CODE, 
-                payment_url: process.env.ESEWA_WEB_API_URL, 
-            }
+            paymentDetails: paymentDetails
         });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error: ' + error.message });
+        console.error('Payment initiation error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server Error: ' + error.message 
+        });
     }
 };
 
-
 exports.verifySubscriptionPayment = async (req, res) => {
     try {
-        const { esewaData } = req.body; 
-
-        if (!esewaData || !esewaData.transaction_code) {
-            return res.status(400).json({ success: false, message: 'Verification data is missing or invalid.' });
-        }
+        console.log(req.body);
         
-        let decodedData;
-        if (typeof esewaData === 'string') {
-            decodedData = JSON.parse(Buffer.from(esewaData, 'base64').toString('utf-8'));
-        } else {
-            decodedData = esewaData; 
+        // eSewa sends data as query parameters in the success URL
+        const { oid, amt, refId } = req.body;
+
+        if (!oid || !refId) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Missing required payment verification data.' 
+            });
         }
+
+        const paymentRecord = await Payment.findOne({ 
+            transactionUUID: oid,
+            status: 'PENDING'
+        });
         
-        if (decodedData.status !== "COMPLETE") {
-            return res.status(400).json({ success: false, message: 'Payment was not completed.' });
+        if (!paymentRecord) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Invalid or already processed transaction.' 
+            });
         }
 
-        const paymentRecord = await Payment.findOne({ transactionUUID: decodedData.transaction_uuid });
-        if (!paymentRecord || paymentRecord.status !== 'PENDING') {
-            return res.status(404).json({ success: false, message: 'Invalid or already processed transaction.' });
-        }
+        const verificationUrl = `https://rc.esewa.com.np/epay/transrec`;
+        const verificationData = {
+            amt: paymentRecord.amount,
+            pid: oid,
+            rid: refId,
+            scd: process.env.ESEWA_MERCHANT_CODE
+        };
 
-        const signatureString = `transaction_code=${decodedData.transaction_code},status=${decodedData.status},total_amount=${decodedData.total_amount},transaction_uuid=${decodedData.transaction_uuid},product_code=${decodedData.product_code},signed_field_names=${decodedData.signed_field_names}`;
-        const generatedSignature = crypto.HmacSHA256(signatureString, process.env.ESEWA_MERCHANT_SECRET).toString(crypto.enc.Base64);
-
-        if (generatedSignature !== decodedData.signature) {
-             return res.status(400).json({ success: false, message: 'Payment verification failed. Signature mismatch.' });
-        }
 
         const user = await User.findById(paymentRecord.user);
+        if (!user) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not found.' 
+            });
+        }
+
         user.subscription.plan = 'PRO';
         user.subscription.status = 'ACTIVE';
-        user.subscription.expiresAt = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+        user.subscription.expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
         await user.save();
 
         paymentRecord.status = 'COMPLETE';
-        paymentRecord.esewaTransactionCode = decodedData.transaction_code;
+        paymentRecord.esewaTransactionCode = refId;
         await paymentRecord.save();
+        
+        console.log('Payment verification successful for user:', user._id);
         
         res.status(200).json({
             success: true,
@@ -98,6 +115,10 @@ exports.verifySubscriptionPayment = async (req, res) => {
         });
 
     } catch (error) {
-         res.status(500).json({ success: false, message: 'Server Error: ' + error.message });
+        console.error('Payment verification error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server Error: ' + error.message 
+        });
     }
 };

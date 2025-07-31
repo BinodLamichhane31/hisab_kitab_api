@@ -170,6 +170,7 @@ exports.deleteProduct = async (req, res) => {
         }
 
         // Add check here to prevent deletion if product is in transactions
+        
 
         if (product.image) {
             const imagePath = path.join(__dirname, '..', product.image);

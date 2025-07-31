@@ -60,14 +60,18 @@ exports.getChartData = async (req, res) => {
 
         const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-        const twelveMonthsAgo = new Date();
-        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
-        twelveMonthsAgo.setDate(1);
-        twelveMonthsAgo.setHours(0, 0, 0, 0);
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 11);
+        startDate.setDate(1);
+        startDate.setHours(0, 0, 0, 0);
 
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1, 0); 
+        endDate.setHours(23, 59, 59, 999);
+        
         const [salesData, purchasesData] = await Promise.all([
             Sale.aggregate([
-                { $match: { shop: shopObjectId, status: 'COMPLETED', saleDate: { $gte: twelveMonthsAgo } } },
+                { $match: { shop: shopObjectId, status: 'COMPLETED', saleDate: { $gte: startDate, $lte: endDate } } },
                 { $group: { 
                     _id: { year: { $year: "$saleDate" }, month: { $month: "$saleDate" } },
                     total: { $sum: "$grandTotal" } 
@@ -75,7 +79,7 @@ exports.getChartData = async (req, res) => {
                 { $sort: { "_id.year": 1, "_id.month": 1 } }
             ]),
             Purchase.aggregate([
-                { $match: { shop: shopObjectId, status: 'COMPLETED', purchaseDate: { $gte: twelveMonthsAgo } } },
+                { $match: { shop: shopObjectId, status: 'COMPLETED', purchaseDate: { $gte: startDate, $lte: endDate } } },
                 { $group: {
                     _id: { year: { $year: "$purchaseDate" }, month: { $month: "$purchaseDate" } },
                     total: { $sum: "$grandTotal" }
@@ -87,25 +91,29 @@ exports.getChartData = async (req, res) => {
         const chartData = [];
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         
-        for (let i = 11; i >= 0; i--) {
-            const date = new Date();
-            date.setMonth(date.getMonth() - i);
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            const monthName = monthNames[date.getMonth()];
-            
+        let currentDate = new Date(startDate);
+
+        for (let i = 0; i < 12; i++) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1; // getMonth is 0-indexed
+            const monthName = monthNames[currentDate.getMonth()];
+
             const sale = salesData.find(s => s._id.year === year && s._id.month === month);
             const purchase = purchasesData.find(p => p._id.year === year && p._id.month === month);
 
             chartData.push({
-                name: monthName,
+                name: `${monthName}`, 
                 sales: sale?.total || 0,
                 purchases: purchase?.total || 0,
             });
+            
+            currentDate.setMonth(currentDate.getMonth() + 1);
         }
 
         res.status(200).json({ success: true, data: chartData });
+
     } catch (error) {
+        console.error('Chart Data Error:', error);
         res.status(500).json({ success: false, message: 'Server Error: ' + error.message });
     }
 };
