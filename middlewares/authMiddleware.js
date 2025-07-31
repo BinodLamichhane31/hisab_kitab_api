@@ -8,7 +8,6 @@ exports.protect = async (req, res, next) => {
         token = req.cookies.token;
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
-        console.log(token);
         
     }
 
@@ -36,7 +35,6 @@ exports.protect = async (req, res, next) => {
         
         next();
     } catch (error) {
-        console.error(error);
         return res.status(401).json({
             success: false,
             message: 'Not authorized, token failed'

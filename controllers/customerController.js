@@ -10,6 +10,8 @@ const { date } = require("yup");
 const Customer = require("../models/Customer");
 const Shop = require("../models/Shop");
 const { log } = require("winston");
+const Transaction = require("../models/Transaction");
+const Sale = require("../models/Sale");
 
 exports.addCustomer = async (req, res) =>{
     try {        
@@ -79,7 +81,7 @@ exports.getCustomersByShop = async(req, res) =>{
     // sorting, searching and paginations 
     // respond with data
     try {
-        const {search = "", shopId} = req.query
+                const {search = "", shopId} = req.query
         const userId = req.user._id;
 
         if(!shopId){
@@ -127,7 +129,7 @@ exports.getCustomersByShop = async(req, res) =>{
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Internl server error."
+            message: "Internl server error." + error
         })
         
     }     
@@ -250,8 +252,24 @@ exports.deleteCustomer = async (req, res) => {
                 message: "You are not authorized to update this customer"
             });
         } 
-        // Data Integrity
-        // Transaction to be counted. if transaction of the customer is more than 1, prevent deletion
+        const transactionCount = await Transaction.countDocuments({ relatedCustomer: customerId });
+
+        if (transactionCount > 0) {
+          return res.status(400).json({
+            success: false,
+            message: `Cannot delete customer. This customer has ${transactionCount} associated transaction(s).`,
+          });
+        }
+        const saleCount = await Sale.countDocuments({ customer: customerId });
+        if (saleCount > 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Cannot delete customer. This customer has ${saleCount} associated sale(s).`,
+            });
+        }
+
+        
+        
 
         await Customer.findByIdAndDelete(customerId);
         return res.status(200).json({

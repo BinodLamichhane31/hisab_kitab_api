@@ -112,7 +112,6 @@ exports.loginUser = async (req, res) => {
 
     const checkPassword = await bcrypt.compare(password, getUser.password);
     if (!checkPassword) {
-      console.log("Password mismatch", password, getUser.password);
       return res.status(401).json({ 
         success: false,
         message: "Invalid Password",
@@ -194,12 +193,12 @@ exports.getProfile = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   const userId = req.user._id;
-  const { fname, lname, phone } = req.body;
+  const { fname, lname } = req.body;
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { fname, lname, phone },
+      { fname, lname },
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -209,6 +208,7 @@ exports.updateProfile = async (req, res) => {
       data: updatedUser,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: `Server error: ${error.message}`,

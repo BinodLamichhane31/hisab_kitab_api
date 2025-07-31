@@ -20,7 +20,15 @@ exports.hisabAssistant = async (req, res) => {
     if (!query) return res.status(400).json({ message: "Query is required." });
 
     try {
-        const user = await User.findById(userId).populate('activeShop').select('fname lname activeShop');
+        const user = await User.findById(userId).populate('activeShop').select('fname lname activeShop subscription');
+        
+        const userPlan = user.subscription.plan;        
+        if (userPlan === 'FREE') {
+            return res.status(403).json({
+                success: false,
+                message: "Please upgrade to Pro to use Hisab Assistant Bot."
+            });
+        }
         if (!user || !user.activeShop) {
             return res.status(400).json({ message: "Please select an active shop first." });
         }

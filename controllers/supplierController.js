@@ -1,5 +1,8 @@
 const Supplier = require("../models/Supplier");
 const Shop = require("../models/Shop");
+const Purchase = require("../models/Purchase");
+const logger = require("../utils/logger");
+const Transaction = require("../models/Transaction");
 
 exports.addSupplier = async (req, res) =>{
     try {        
@@ -233,7 +236,21 @@ exports.deleteSupplier = async (req, res) => {
             });
         } 
         // Data Integrity
-        // Transaction to be counted. if transaction of the Supplier is more than 1, prevent deletion
+        const transactionCount = await Transaction.countDocuments({ relatedSupplier: supplierId });
+
+        if (transactionCount > 0) {
+          return res.status(400).json({
+            success: false,
+            message: `Cannot delete supplier. This supplier has ${transactionCount} associated transaction(s).`,
+          });
+        }
+        const purchaseCount = await Purchase.countDocuments({ supplier: supplierId });
+        if (purchaseCount > 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Cannot delete supplier. This supplier has ${purchaseCount} associated sale(s).`,
+            });
+        }
 
         await Supplier.findByIdAndDelete(supplierId);
         return res.status(200).json({

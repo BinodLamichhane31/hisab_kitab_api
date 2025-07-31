@@ -21,13 +21,16 @@ exports.createSale = async (req, res) => {
     const { shopId, customerId, items, discount, tax, amountPaid, notes, saleDate } = req.body;
     const userId = req.user._id;
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    const isTestEnv = process.env.NODE_ENV === 'test';
+    const session = isTestEnv ? null : await mongoose.startSession();
+    if (!isTestEnv) {
+        session.startTransaction();
+    }
 
     try {
         const { error, status } = await verifyShopOwner(shopId, userId);
         if (error) {
-            await session.abortTransaction();
+            if (!isTestEnv) await session.abortTransaction(); // Abort if session exists
             return res.status(status).json({ success: false, message: error });
         }
         
@@ -103,7 +106,9 @@ exports.createSale = async (req, res) => {
             await Transaction.create([transactionData], { session });
         }
 
-        await session.commitTransaction();
+        if (!isTestEnv) {
+            await session.commitTransaction();
+        }
         res.status(201).json({ 
             success: true, 
             message: `Sale created successfully (${isCashSale ? 'Cash Sale' : 'Customer Sale'}).`, 
@@ -111,10 +116,14 @@ exports.createSale = async (req, res) => {
         });
 
     } catch (error) {
-        await session.abortTransaction();
+        if (!isTestEnv) {
+            await session.abortTransaction();
+        }
         res.status(400).json({ success: false, message: error.message });
     } finally {
-        session.endSession();
+        if (!isTestEnv) {
+            session.endSession();
+        }
     }
 };
 

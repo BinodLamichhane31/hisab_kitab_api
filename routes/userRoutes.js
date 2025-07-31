@@ -14,14 +14,20 @@ router.post(
     registerUser
 )
 
+const loginMiddleware = [
+    loginValidation,
+    validate
+];
+
+if (process.env.NODE_ENV !== 'test') {
+    loginMiddleware.unshift(loginLimiter);
+}
+
 router.post(
     "/login",
-    loginLimiter,
-    loginValidation,
-    validate,
+    ...loginMiddleware, 
     loginUser
-)
-
+);
 router.get(
     "/profile",
     protect,
@@ -31,7 +37,6 @@ router.get(
 router.put(
   "/profile",
   protect,
-  validate,
   updateProfile
 );
 
