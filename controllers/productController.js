@@ -169,7 +169,7 @@ exports.deleteProduct = async (req, res) => {
             return res.status(status).json({ success: false, message: error });
         }
 
-        // Add check here to prevent deletion if product is in transactions
+        
         
 
         if (product.image) {

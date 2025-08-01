@@ -5,7 +5,6 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 dotenv.config();   
-
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/admin/adminRoutes");
 const logRoutes = require("./routes/admin/systemLogRoutes");
@@ -22,10 +21,8 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const botRoutes = require("./routes/botRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
-// Create the app
 const app = express();
 
-// --- Middleware Setup ---
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());

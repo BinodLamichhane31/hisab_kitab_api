@@ -22,7 +22,7 @@ describe("Transaction Controller Endpoints", () => {
         verifyShopOwner.mockReset();
 
         await request(app).post("/api/auth/register").send(userData);
-        const loginRes = await request(app).post("/api/auth/login").send({ email: userData.email, password: userData.password });
+        const loginRes = await request(app).post("/api/auth/login").send({ email: userData.email, password: userData.password });        
         authToken = loginRes.body.token;
         testUser = loginRes.body.data.user;
         testShop = await new Shop({ ...shopData, owner: testUser._id }).save();

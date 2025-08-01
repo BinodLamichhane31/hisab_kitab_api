@@ -5,15 +5,12 @@ const app = require('./app');
 const connectDB = require('./config/db');
 const { initScheduledJobs } = require('./services/scheduler');
 
-// Load environment variables
 dotenv.config();
 
-// Connect to the database
 connectDB();
 
 const PORT = process.env.PORT || 6060;
 
-// Create the HTTP server and Socket.IO server from the app
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -22,7 +19,6 @@ const io = new Server(server, {
     }
 });
 
-// --- Socket.IO Connection Logic ---
 const userSockets = new Map();
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);

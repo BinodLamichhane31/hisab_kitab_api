@@ -5,19 +5,33 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit"
+    "test": "cross-env NODE_ENV=test jest --coverage --detectOpenHandles --forceExit",
+    "seed:import": "node seeder.js --import",
+    "seed:delete": "node seeder.js --delete"
   },
   "jest": {
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "./jest.setup.js" 
-    ]
-  },
+  "testEnvironment": "node",
+  "setupFilesAfterEnv": ["./jest.setup.js"],
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "controllers/**/*.js",
+    "routes/**/*.js",
+    "middlewares/**/*.js",
+    "models/**/*.js",
+    "utils/**/*.js",
+    "!**/node_modules/**",
+    "!**/tests/**",
+    "!**/__mocks__/**"
+  ],
+  "coverageDirectory": "./coverage",
+  "coverageReporters": ["json", "lcov", "text", "clover"]
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@google/generative-ai": "^0.24.1",
     "@pinecone-database/pinecone": "^6.1.2",
     "bcrypt": "^6.0.0",
@@ -51,6 +65,7 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "jest": "^30.0.4",
+    "jest-html-reporters": "^3.1.7",
     "mockingoose": "^2.16.2",
     "supertest": "^7.1.3"
   }

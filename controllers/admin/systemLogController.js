@@ -1,5 +1,3 @@
-// In your log controller file (e.g., controllers/logController.js)
-
 const SystemLog = require("../../models/SystemLogs");
 
 exports.getLogs = async (req, res) => {
